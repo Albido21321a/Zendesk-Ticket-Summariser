@@ -484,8 +484,8 @@ class OpenRouterClient:
         payload = {
             "model": self.model,
             "messages": [
-                {"role":"system","content": sys_prompt},
-                {"role":"user","content": f"Items:\n{user_payload}"}
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": f"Items:\n{user_payload}"},
             ],
             "temperature": 0.1,
             "max_tokens": max(64, max_tokens_each * len(items) + 32),
@@ -493,11 +493,24 @@ class OpenRouterClient:
         data = self._post(payload)
         if not data:
             return ["" for _ in items]
+
         content = (data.get("choices", [{}])[0].get("message", {}).get("content", "") or "").strip()
         raw = self._strip_code_fences(content)
         arr = self._safe_json_parse(raw, self.debug)
+        trimmed = (raw or "").strip()
+
         if isinstance(arr, list) and len(arr) == len(items):
             return [(s or "").strip() if isinstance(s, str) else "" for s in arr]
+
+        incomplete = trimmed.startswith("[") and not trimmed.endswith("]")
+        length_mismatch = isinstance(arr, list) and len(arr) != len(items)
+
+        if (incomplete or length_mismatch) and len(items) > 1:
+            mid = len(items) // 2
+            left = self.summarise_one_liners_batch(items[:mid], max_tokens_each)
+            right = self.summarise_one_liners_batch(items[mid:], max_tokens_each)
+            return left + right
+
         if self.debug:
             _log("[DEBUG] OpenRouter batch one-liner JSON parse failed. Head: " + content[:400])
         return ["" for _ in items]
@@ -621,11 +634,24 @@ class OpenAIClient:
             data = r.json()
         except Exception:
             return ["" for _ in items]
+
         content = ((data.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
         raw = self._strip_code_fences(content)
         arr = self._safe_json_parse(raw, self.debug)
+        trimmed = (raw or "").strip()
+
         if isinstance(arr, list) and len(arr) == len(items):
             return [(s or "").strip() if isinstance(s, str) else "" for s in arr]
+
+        incomplete = trimmed.startswith("[") and not trimmed.endswith("]")
+        length_mismatch = isinstance(arr, list) and len(arr) != len(items)
+
+        if (incomplete or length_mismatch) and len(items) > 1:
+            mid = len(items) // 2
+            left = self.summarise_one_liners_batch(items[:mid], max_tokens_each)
+            right = self.summarise_one_liners_batch(items[mid:], max_tokens_each)
+            return left + right
+
         if self.debug:
             _log("[DEBUG] OpenAI batch one-liner JSON parse failed. Head: " + content[:400])
         return ["" for _ in items]
