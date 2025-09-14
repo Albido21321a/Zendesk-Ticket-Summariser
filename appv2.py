@@ -402,7 +402,8 @@ class OpenRouterClient:
 
     @staticmethod
     def _strip_code_fences(s: str) -> str:
-        return re.sub(r"^```(?:json)?\s*|\s*```$", "", s.strip(), flags=re.I|re.M)
+        m = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", s or "", re.I)
+        return m.group(1) if m else s
 
     def _post(self, payload: dict) -> Optional[dict]:
         for i in range(5):
@@ -767,7 +768,8 @@ class OpenAIClient:
     # -------------- Parse helpers --------------
     @staticmethod
     def _strip_code_fences(s: str) -> str:
-        return re.sub(r"^```(?:json)?\s*|\s*```$", "", (s or "").strip(), flags=re.I | re.M)
+        m = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", s or "", re.I)
+        return m.group(1) if m else s
 
     @staticmethod
     def _extract_responses_text(data: dict) -> str:
