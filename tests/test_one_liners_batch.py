@@ -22,7 +22,7 @@ def test_openrouter_batch_parses_json_with_fences_and_noise():
             "choices": [
                 {
                     "message": {
-                        "content": "Intro text\n```json\n[\"one\", \"two\"]\n```\nOutro"
+                        "content": "Intro [0]\n```json\n[\"one\", \"two\"]\n```\nOutro {ignored}"
                     }
                 }
             ]
@@ -44,7 +44,7 @@ def test_openai_batch_parses_json_with_fences_and_noise():
                 "choices": [
                     {
                         "message": {
-                            "content": "Here\n```json\n[\"x\", \"y\"]\n```\nThanks"
+                            "content": "Pre [noise]\n```json\n[\"x\", \"y\"]\n```\nPost {junk}"
                         }
                     }
                 ]
