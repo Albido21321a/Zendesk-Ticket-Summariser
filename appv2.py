@@ -492,28 +492,29 @@ class OpenRouterClient:
         data = self._post(payload)
         if not data:
             return ["" for _ in items]
-        content = (data.get("choices",[{}])[0].get("message",{}).get("content","") or "").strip()
-        try:
-            arr = json.loads(content)
-            if isinstance(arr, list) and len(arr) == len(items):
-                return [(s or "").strip() if isinstance(s, str) else "" for s in arr]
-        except Exception:
-            if self.debug:
-                _log("[DEBUG] OpenRouter batch one-liner JSON parse failed. Head: " + content[:400])
+        content = (data.get("choices", [{}])[0].get("message", {}).get("content", "") or "").strip()
+        raw = self._strip_code_fences(content)
+        arr = self._safe_json_parse(raw, self.debug)
+        if isinstance(arr, list) and len(arr) == len(items):
+            return [(s or "").strip() if isinstance(s, str) else "" for s in arr]
+        if self.debug:
+            _log("[DEBUG] OpenRouter batch one-liner JSON parse failed. Head: " + content[:400])
         return ["" for _ in items]
 
     @staticmethod
-    def _safe_json_parse(content: str, debug=False) -> Optional[dict]:
+    def _safe_json_parse(content: str, debug=False) -> Optional[Any]:
         try:
             return json.loads(content)
         except Exception:
             pass
-        m = re.search(r"\{[\s\S]*\}", content)
-        if m:
-            try:
-                return json.loads(m.group(0))
-            except Exception:
-                if debug: _log("[DEBUG] JSON object extraction failed.")
+        for pat in [r"\[[\s\S]*\]", r"\{[\s\S]*\}"]:
+            m = re.search(pat, content or "")
+            if m:
+                try:
+                    return json.loads(m.group(0))
+                except Exception:
+                    if debug:
+                        _log("[DEBUG] JSON extraction failed.")
         return None
 
     @staticmethod
@@ -620,13 +621,12 @@ class OpenAIClient:
         except Exception:
             return ["" for _ in items]
         content = ((data.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
-        try:
-            arr = json.loads(content)
-            if isinstance(arr, list) and len(arr) == len(items):
-                return [(s or "").strip() if isinstance(s, str) else "" for s in arr]
-        except Exception:
-            if self.debug:
-                _log("[DEBUG] OpenAI batch one-liner JSON parse failed. Head: " + content[:400])
+        raw = self._strip_code_fences(content)
+        arr = self._safe_json_parse(raw, self.debug)
+        if isinstance(arr, list) and len(arr) == len(items):
+            return [(s or "").strip() if isinstance(s, str) else "" for s in arr]
+        if self.debug:
+            _log("[DEBUG] OpenAI batch one-liner JSON parse failed. Head: " + content[:400])
         return ["" for _ in items]
 
     # -------------- HTTP helpers --------------
@@ -785,18 +785,19 @@ class OpenAIClient:
         return "\n".join(out).strip()
 
     @staticmethod
-    def _safe_json_parse(content: str, debug: bool = False) -> Optional[dict]:
+    def _safe_json_parse(content: str, debug: bool = False) -> Optional[Any]:
         try:
             return json.loads(content)
         except Exception:
             pass
-        m = re.search(r"\{[\s\S]*\}", content or "")
-        if m:
-            try:
-                return json.loads(m.group(0))
-            except Exception:
-                if debug:
-                    _log("[DEBUG] JSON object extraction failed.")
+        for pat in [r"\[[\s\S]*\]", r"\{[\s\S]*\}"]:
+            m = re.search(pat, content or "")
+            if m:
+                try:
+                    return json.loads(m.group(0))
+                except Exception:
+                    if debug:
+                        _log("[DEBUG] JSON extraction failed.")
         return None
 
     @staticmethod
