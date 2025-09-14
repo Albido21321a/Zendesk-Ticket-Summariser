@@ -1,0 +1,167 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Zendesk Ticket Summaries</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+:root { --bg: #0b1020; --panel: #121a2b; --muted: #9aa3b2; --text: #e5ecf3; --accent: #64d3ff; --accent2: #7c5cff; --chip: #1e2a44; --border: #25314a; }
+* { box-sizing: border-box }
+html,body { margin:0; padding:0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial; }
+.header { position: sticky; top: 0; z-index: 5; background: linear-gradient(120deg, rgba(100,211,255,.2), rgba(124,92,255,.15) 50%, rgba(18,26,43,.8)); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); padding: 14px 18px; display:flex; align-items:center; gap:14px; }
+.h-title { font-weight:700; letter-spacing:.3px; }
+.h-badge { padding:3px 8px; border-radius:999px; background:rgba(100,211,255,.2); border:1px solid rgba(100,211,255,.35); font-size:12px; }
+.toolbar { display:flex; gap:10px; align-items:center; margin-left:auto; }
+.input, .select { background: var(--panel); color: var(--text); border:1px solid var(--border); padding: 8px 10px; border-radius:10px; outline:none; min-width: 180px; }
+.input::placeholder { color: #94a3b8 }
+.container { padding: 16px 18px 28px; }
+.card { background: var(--panel); border:1px solid var(--border); border-radius: 16px; padding: 14px; margin: 10px 0; animation: fadeIn .4s ease both; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px) } to { opacity:1; transform:none } }
+.row { display:grid; grid-template-columns: 92px 1fr 130px 120px 170px; gap:12px; align-items:start; }
+.row + .row { margin-top:12px }
+.id a { color: var(--accent); text-decoration:none }
+.subject { font-weight:600 }
+.meta { color: var(--muted); font-size: 12px }
+.badges { display:flex; gap:6px; flex-wrap:wrap; }
+.badge { background: var(--chip); border:1px solid var(--border); color: #cbd5e1; font-size: 12px; padding:3px 8px; border-radius:999px }
+.reso { display:inline-flex; align-items:center; gap:6px; font-weight:600; }
+.reso-dot { width:8px; height:8px; border-radius:50%; background:#666; box-shadow:0 0 0 3px rgba(255,255,255,.05) inset }
+.summary { white-space: pre-wrap; line-height:1.5; }
+.hl { color:#cbd5e1 }
+.next-step { margin-top:6px; color:#e2e8f0 }
+.footer { color: var(--muted); margin-top: 14px; font-size: 12px }
+.controls { display:flex; gap:8px; flex-wrap:wrap; }
+hr.sep { border:0; border-top:1px dashed var(--border); margin:8px 0 }
+.small { font-size: 12px; color: #a5b4fc }
+.details { margin-top:8px; }
+details > summary { cursor: pointer; user-select:none; color:#a5b4fc }
+.perline { display:flex; align-items:center; gap:8px; margin:6px 0; }
+.chip-tv { background:#3b1d27; border:1px solid #ef4444; color:#fecaca; font-size:11px; padding:2px 6px; border-radius:999px }
+.badge-src { background:#1e293b; border-color:#64748b; }
+</style>
+</head><body>
+
+<div class="header">
+  <div class="h-title">Zendesk Ticket Summaries</div>
+  <span class="h-badge">2025-09-15 03:29</span>
+  <div class="toolbar">
+    <input id="q" class="input" placeholder="Search subject / summary…" />
+    <select id="filterStatus" class="select">
+      <option value="">Resolution: All</option>
+      <option value="resolved">Resolved</option>
+      <option value="waiting_on_customer">Waiting on Customer</option>
+      <option value="waiting_on_us">Waiting on Us</option>
+      <option value="needs_more_info">Needs More Info</option>
+      <option value="unknown">Unknown</option>
+    </select>
+    <select id="filterCat" class="select"></select>
+    <select id="sortBy" class="select">
+      <option value="easy">Sort by Easy Score</option>
+      <option value="updated">Sort by Updated</option>
+      <option value="priority">Sort by Priority</option>
+    </select>
+  </div>
+</div>
+
+<div class="container" id="app"></div>
+
+<script>
+const DATA = [{"id": 764271, "subject": "FW: InVentry - Abram Bryn Gates Primary School WN2 5JT", "requester": "Elliott Hemming", "org": 12651164038685, "priority": "normal", "triage_priority_hint": "normal", "triage_route": "L1", "triage_ease": "medium", "status": "hold", "updated_at": "2025-09-12T06:31:11Z", "category": "Login", "easy_score": 6, "quick_reasons": "customer_question,clear_login,rule_hit", "summary": "The installation request for InVentry at Abram Bryn Gates Primary School has been delayed, causing concerns about health and safety due to the lack of a digital sign-in system. The ticket was previously paused but has now been reopened for action.", "resolution_status": "waiting_on_us", "evidence": "No action taken despite previous inquiries.", "next_step": "Verify identity; update username/email in system; ensure SSO/dir sync picks up the change; confirm login on console and desktop.", "url": "https://inventry.zendesk.com/agent/tickets/764271", "tags": ["awaiting_new_ticket_module_tracking", "contact_reason_software_/_configuration_issues__configuration_issue", "gen_5", "part_of_trust", "product_software___system__inventry_console", "sentiment_green", "sentiment_group_n/a", "service_inventry_edge", "support_team_1", "version_4"], "origin": "llm", "rule_name": "login_email_or_name_change_mismatch", "rule_confidence": 0.65, "rule_why": "any=['new email']", "per_lines": [{"role": "Customer", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 756466, "subject": "Inventry Update", "requester": "Beth Lawrence", "org": 3954470377, "priority": "normal", "triage_priority_hint": "normal", "triage_route": "L1", "triage_ease": "medium", "status": "hold", "updated_at": "2025-09-12T07:10:14Z", "category": "Login", "easy_score": 6, "quick_reasons": "clear_login,rule_hit", "summary": "The ticket discusses ongoing issues with network access and backup solutions for multiple sites, specifically Polesden Lacey and Furzefield. The agent is awaiting whitelisting of a URL and has not received confirmation on console access setup. There are also concerns about the backup configuration that needs to be addressed by the customer.", "resolution_status": "waiting_on_customer", "evidence": "Still waiting on Eduting to whitelist the url.", "next_step": "Check desktop app/URL and version; clear cached creds; verify SSO vs local auth and tenant URL; test login via Console.", "url": "https://inventry.zendesk.com/agent/tickets/756466", "tags": ["adaptive_it_solutions", "awaiting_new_ticket_module_tracking", "eod_no", "gen_6", "help_support_not_requested", "no", "part_of_trust", "sentiment_escalation", "sentiment_group_n/a", "slapause", "support_team_1", "version_4"], "origin": "llm", "rule_name": "login_phone_ok_desktop_fails", "rule_confidence": 0.65, "rule_why": "any=['unable to sign in via the desktop system']", "per_lines": [{"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 764265, "subject": "Re: MIS Inventry Cloud Sync from Azure AD not working properly.", "requester": "Khai Lau", "org": 17622297929885, "priority": "normal", "triage_priority_hint": "normal", "triage_route": "L1", "triage_ease": "medium", "status": "hold", "updated_at": "2025-09-12T14:33:58Z", "category": "Login", "easy_score": 6, "quick_reasons": "customer_question,no_attachments,clear_login,rule_hit", "summary": "The customer is experiencing issues with Azure AD syncing to the InVentry Console, specifically with names not appearing. A remote session has been scheduled for September 18th, 8-9 AM to troubleshoot the issue. The agent confirmed availability and requested the customer to call when ready for the session.", "resolution_status": "waiting_on_customer", "evidence": "Remote session scheduled for September 18th.", "next_step": "Provide the updated Console launcher/app path; verify stored credentials; reset password if needed; confirm login works after the screen upgrade.", "url": "https://inventry.zendesk.com/agent/tickets/764265", "tags": ["awaiting_new_ticket_module_tracking", "contact_reason_integration_/_data_issues__data_import", "first_time_intervention_received", "follow_up", "gen_5", "help_support_not_requested", "no", "nps_survey_sent", "part_of_trust", "product_software___system__integrations__mis__active_directory_/_azure_ad_/_entra_id", "reopen_reason_not_solved", "sentiment_amber", "sentiment_group_n/a", "service_inventry_cloud", "support_team_2", "teamviewer_credentials_requested", "version_4"], "origin": "llm", "rule_name": "login_batchfile_username_password_error", "rule_confidence": 0.65, "rule_why": "regex=['\\\\b(console)\\\\b.*\\\\b(username|password|log ?in|sign ?in)\\\\b']", "per_lines": [{"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 753995, "subject": "InVentry -  Cloud Upgrade Request", "requester": "Farhan Sipahi", "org": 25236788696733, "priority": "normal", "triage_priority_hint": "normal", "triage_route": "L1", "triage_ease": "easy", "status": "hold", "updated_at": "2025-09-14T19:43:05Z", "category": "Login", "easy_score": 6, "quick_reasons": "clear_login,rule_hit", "summary": "The customer is awaiting cloud upgrade access, which is currently being set up by the IT Security team. The agent confirmed that the necessary credentials are now active, but the customer encountered a login error when attempting to connect to the system. The agent is troubleshooting the connection issue with the customer.", "resolution_status": "waiting_on_us", "evidence": "Credentials are now active; login error encountered.", "next_step": "Confirm tenant/URL; check the user exists and has the correct role; reset password; verify they’re not using a shared IT admin account.", "url": "https://inventry.zendesk.com/agent/tickets/753995", "tags": ["admin_no_contact", "awaiting_new_ticket_module_tracking", "bypass_trigger_to_escalate", "eod_no", "gen_6", "help_support_not_requested", "inventry_cloud__cloud_-_upgrade_request", "maintenance_and_anywhere", "part_of_trust", "post_implementation", "remote_connect_anytime", "sentiment_amber", "sentiment_group_n/a", "slapause", "software_related", "support_team_1", "v4", "version_4", "yes"], "origin": "llm", "rule_name": "login_unable_except_it_login", "rule_confidence": 0.65, "rule_why": "any=['unable to login']", "per_lines": [{"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 768185, "subject": "InVentry - Semi Slave Setup", "requester": "Reece Tew", "org": 370201962614, "priority": "normal", "triage_priority_hint": "-", "triage_route": "-", "triage_ease": "-", "status": "hold", "updated_at": "2025-09-14T18:23:20Z", "category": "Install", "easy_score": 4, "quick_reasons": "customer_question,clear_install", "summary": "The customer requested to set up Hinde House Secondary as the main site and Hinde House Primary as a semi slave on the InVentry system. The agent confirmed the setup but faced delays due to synchronization issues and the need to remake configurations. The agent is working overtime to resolve the issues and ensure everything is ready by Monday morning.", "resolution_status": "waiting_on_us", "evidence": "Syncing issues with Cloud; need to remake everything.", "next_step": "Continue working on the synchronization and setup tomorrow.", "url": "https://inventry.zendesk.com/agent/tickets/768185", "tags": ["awaiting_new_ticket_module_tracking", "contact_reason_integration_/_data_issues__database_issues_/_corrupt_database", "education", "eod_no", "first_time_intervention_received", "follow_up", "gen_5", "help_support_not_requested", "no", "nps_survey_sent", "part_of_trust", "product_software___system__database", "reopen_reason_additional_question", "sentiment_amber", "sentiment_group_n/a", "service_inventry_cloud", "slapause", "support_team_1", "ticket_reopened_in_lifetime", "version_4", "virtue_technologies_ltd"], "origin": "llm", "rule_name": "", "rule_confidence": "", "rule_why": "", "per_lines": [{"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 766261, "subject": "Re: install console", "requester": "-", "org": 33709218, "priority": "normal", "triage_priority_hint": "-", "triage_route": "-", "triage_ease": "-", "status": "hold", "updated_at": "2025-09-12T11:21:08Z", "category": "Install", "easy_score": 2, "quick_reasons": "clear_install", "summary": "The customer is experiencing issues with installing the console due to connection errors and incorrect credentials. After correcting the credentials, installation was successful on one device, but similar errors persist on another device. The customer has requested further assistance and a follow-up call is scheduled for Tuesday.", "resolution_status": "waiting_on_customer", "evidence": "Customer reported too many connections; installation succeeded after correct credentials.", "next_step": "Schedule a follow-up call for Tuesday as requested.", "url": "https://inventry.zendesk.com/agent/tickets/766261", "tags": ["admin_no_contact", "awaiting_new_ticket_module_tracking", "contact_reason_software_/_configuration_issues__credentials_/_pin_/_log-in_error", "elementary_technology_limited", "eod_no", "first_time_intervention_received", "follow_up", "gen_5", "help_support_not_requested", "no", "nps_survey_sent", "part_of_trust", "product_software___system__inventry_console", "reopen_reason_additional_question", "sentiment_green", "sentiment_group_n/a", "service_zendesk", "support_team_2", "ticket_reopened", "ticket_reopened_in_lifetime", "version_3", "version_4"], "origin": "llm", "rule_name": "", "rule_confidence": "", "rule_why": "", "per_lines": [{"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 704834, "subject": "RE: [InVentry Support] Re: Auto Code Not Working on Trust Office System", "requester": "Stuart Anderson", "org": 16019464007325, "priority": "high", "triage_priority_hint": "-", "triage_route": "-", "triage_ease": "-", "status": "hold", "updated_at": "2025-09-12T19:31:56Z", "category": "Access", "easy_score": 2, "quick_reasons": "customer_question", "summary": "The Autocode feature was initially not functioning correctly, causing confusion among staff during sign-in. After multiple tests and adjustments, it has been confirmed to be working as intended. Staff can now use their registered cards without needing to re-register, although prompts will still appear for new users.", "resolution_status": "resolved", "evidence": "Autocode is now working as expected; staff can self autocode.", "next_step": "Monitor user feedback to ensure no further issues arise.", "url": "https://inventry.zendesk.com/agent/tickets/704834", "tags": ["3rd_line_assistance_given", "_inventry_central", "add_follower_jodie_taylor", "admin_no_contact", "bypass_trigger_to_escalate", "follow_up", "help_support_not_requested", "jordan_blake", "remote_connect_anytime", "reopen_reason_not_solved", "sentiment_green", "sentiment_group_n/a", "slapause", "software_related", "support_team_3", "ticket_reopened", "ticket_reopened_in_lifetime", "v4"], "origin": "llm", "rule_name": "", "rule_confidence": "", "rule_why": "", "per_lines": [{"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 768022, "subject": "No Pupil data on Inventry", "requester": "Julie Caine", "org": 28690070943389, "priority": "normal", "triage_priority_hint": "-", "triage_route": "-", "triage_ease": "-", "status": "hold", "updated_at": "2025-09-13T15:06:22Z", "category": "Data", "easy_score": 2, "quick_reasons": "customer_question", "summary": "The issue involves pupil data not being updated from Bromcom to InVentry due to missing permissions. The agent identified two required permissions that are not enabled, which may be causing the data transfer failure.", "resolution_status": "waiting_on_customer", "evidence": "\"2 permissions are missing\"; \"pupils are not being updated\"", "next_step": "Request the customer to enable the missing permissions.", "url": "https://inventry.zendesk.com/agent/tickets/768022", "tags": ["awaiting_new_ticket_module_tracking", "contact_reason_integration_/_data_issues__data_pull_failure", "first_time_intervention_received", "no", "part_of_trust", "post_implementation", "product_software___system__integrations__mis__bromcom", "remote_connect_anytime", "sentiment_30day", "sentiment_group_n/a", "service_inventry_cloud", "support_team_2", "teamviewer_credentials_requested", "version_4_-_cloud"], "origin": "llm", "rule_name": "", "rule_confidence": "", "rule_why": "", "per_lines": [{"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Customer", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}, {"id": 762245, "subject": "Assistance with badge printer", "requester": "InVentry (Notifications)", "org": 33149063, "priority": "normal", "triage_priority_hint": "-", "triage_route": "-", "triage_ease": "-", "status": "hold", "updated_at": "2025-09-12T18:29:02Z", "category": "Hardware", "easy_score": 0, "quick_reasons": "", "summary": "The badge printer issue was escalated internally after initial troubleshooting. The printer was reconfigured and rebooted, but it remains offline. The customer is asked to verify functionality on Monday after the changes were made.", "resolution_status": "waiting_on_customer", "evidence": "Printer was in Error state just needed a reboot", "next_step": "Wait for the customer to check the printer on Monday.", "url": "https://inventry.zendesk.com/agent/tickets/762245", "tags": ["awaiting_new_ticket_module_tracking", "contact_reason_printing_issues__incorrect_label_type", "custom_time", "first_time_intervention_received", "gen_5", "part_of_trust", "product_hardware_devices__label_printers__ql-820nwb_label_printer", "reopen_reason_not_solved", "sentiment_green", "sentiment_group_n/a", "service_inventry_edge", "support_team_1", "system_email_notification_failure", "ticket_reopened", "ticket_reopened_in_lifetime", "united_carlton_office_systems_ltd", "version_4"], "origin": "llm", "rule_name": "", "rule_confidence": "", "rule_why": "", "per_lines": [{"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}, {"role": "Agent", "text": "", "tv": false}], "any_tv_issue": false}];
+const CATS = ["Access", "Agreement Screen", "Billing", "Bug", "Data", "Hardware", "Install", "Login", "Network", "Other", "Printing", "UI"];
+</script>
+<script>
+const rows = DATA;
+
+const filterCat = document.getElementById('filterCat');
+(function buildCats(){
+  const cats = Array.from(new Set([].concat(CATS, rows.map(r=>r.category).filter(Boolean)))).sort();
+  const blank = document.createElement('option'); blank.value=""; blank.textContent = "Category: All";
+  filterCat.appendChild(blank);
+  cats.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; filterCat.appendChild(o); });
+})();
+
+const q = document.getElementById('q');
+const filterStatus = document.getElementById('filterStatus');
+const sortBy = document.getElementById('sortBy');
+const app = document.getElementById('app');
+
+function dot(color){ return `<span class="reso-dot" style="background:${color}"></span>` }
+function resoBadge(st){
+  const map = {resolved:"#16a34a", waiting_on_customer:"#b45309", waiting_on_us:"#dc2626", needs_more_info:"#4f46e5", unknown:"#6b7280"};
+  const label = {resolved:"Resolved", waiting_on_customer:"Waiting on Customer", waiting_on_us:"Waiting on Us", needs_more_info:"Needs More Info", unknown:"Unknown"}[st] || st;
+  return `<span class="reso">${dot(map[st]||"#6b7280")} ${label}</span>`;
+}
+function priorityBadge(p){
+  const map = { high:"#ef4444", urgent:"#dc2626", normal:"#64748b", low:"#475569", "-":"#374151" };
+  const label = (p||"-").toUpperCase();
+  const color = map[(p||"-").toLowerCase()] || "#374151";
+  return `<span class="badge" style="border-color:${color}; color:${color}">${label}</span>`;
+}
+function categoryBadge(c){ return `<span class="badge">${c||"Other"}</span>`; }
+function triageBadge(name, val){ if(!val||val==='-') return ""; return `<span class="badge">${name}: ${val}</span>`; }
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+function perLineHTML(line){
+  const tv = line.tv ? `<span class="chip-tv">Remote/TV issue</span>` : "";
+  const src = `<span class="badge badge-src">LLM</span>`;
+  return `<div class="perline"><div class="small" style="min-width:80px">${escapeHtml(line.role)}:</div><div>${escapeHtml(line.text||"")}</div>${tv} ${src}</div>`;
+}
+
+function render(){
+  const term = (q.value||"").toLowerCase();
+  const fs = filterStatus.value;
+  const fc = filterCat.value;
+
+  let items = rows.filter(r => {
+    const hitsTerm = !term || (r.subject||"").toLowerCase().includes(term) || (r.summary||"").toLowerCase().includes(term);
+    const hitsStatus = !fs || r.resolution_status === fs;
+    const hitsCat = !fc || r.category === fc;
+    return hitsTerm && hitsStatus && hitsCat;
+  });
+
+  const sortMode = sortBy.value;
+  if (sortMode === "easy"){
+    items.sort((a,b)=> (b.easy_score-a.easy_score) || (a.updated_at.localeCompare(b.updated_at)));
+  } else if (sortMode === "updated"){
+    items.sort((a,b)=> b.updated_at.localeCompare(a.updated_at));
+  } else {
+    const rank = {urgent:4, high:3, normal:2, low:1, "-":0};
+    items.sort((a,b)=> (rank[(b.priority||"-")] - rank[(a.priority||"-")]) || b.updated_at.localeCompare(a.updated_at));
+  }
+
+  app.innerHTML = items.map(r => `
+    <div class="card">
+      <div class="row">
+        <div class="id"><a href="${r.url}" target="_blank">#${r.id}</a><div class="meta">${(r.updated_at||"").replace('T',' ').replace('Z','')}</div></div>
+        <div>
+          <div class="subject">${escapeHtml(r.subject||"")}</div>
+          <div class="summary">${escapeHtml(r.summary||"")}${r.evidence? `<br><span class="hl"><b>Evidence:</b> ${escapeHtml(r.evidence)}</span>`:""}</div>
+          <div class="next-step"><b>Next step:</b> ${escapeHtml(r.next_step||"")}</div>
+          <div class="small">origin=${escapeHtml(r.origin||"-")}${r.rule_name? ` • rule=${escapeHtml(r.rule_name)} (${(r.rule_confidence??"").toString()})`:""}${r.rule_why? ` • why=${escapeHtml(r.rule_why)}`:""}</div>
+
+          ${r.per_lines && r.per_lines.length ? `
+            <details class="details">
+              <summary>Conversation (last ${r.per_lines.length}) — per-email one-liners</summary>
+              <div style="margin-top:8px">
+                ${r.per_lines.map(perLineHTML).join("")}
+              </div>
+            </details>` : ""}
+
+          <div class="footer">${escapeHtml(r.requester||"-")} • ${escapeHtml(r.status||"-")}</div>
+        </div>
+        <div class="badges">
+          ${priorityBadge(r.priority||"-")}
+          ${r.triage_priority_hint? priorityBadge(r.triage_priority_hint):""}
+        </div>
+        <div class="badges">
+          ${categoryBadge(r.category||"Other")}
+          ${triageBadge("Route", r.triage_route)}
+          ${triageBadge("Ease", r.triage_ease)}
+          ${r.any_tv_issue? `<span class="badge" style="border-color:#ef4444;color:#ef9a9a">Remote/TV: issue noted</span>` : ""}
+        </div>
+        <div>${resoBadge(r.resolution_status||"unknown")}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+[q, filterStatus, filterCat, sortBy].forEach(el=> el.addEventListener('input', render));
+render();
+</script>
+</body></html>
